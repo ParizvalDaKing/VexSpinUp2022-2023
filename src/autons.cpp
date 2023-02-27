@@ -1,6 +1,6 @@
-#include "autons.hpp"
 #include "main.h"
-#include "pros/rtos.hpp"
+
+
 
 
 /////
@@ -16,7 +16,6 @@ const int DRIVE_SPEED = 100; // This is 110/127 (around 87% of max speed).  We d
 const int TURN_SPEED  = 90;
 const int SWING_SPEED = 90;
 
- pros::Motor intake(8,pros::E_MOTOR_GEARSET_18);
 
 
 
@@ -69,194 +68,145 @@ void modified_exit_condition() {
   chassis.set_exit_condition(chassis.drive_exit, 80, 50, 300, 150, 500, 500);
 }
 
-
-
-///
-// Drive Example
-///
-void drive_example() {
-  // The first parameter is target inches
-  // The second parameter is max speed the robot will drive at
-  // The third parameter is a boolean (true or false) for enabling/disabling a slew at the start of drive motions
-  // for slew, only enable it when the drive distance is greater then the slew distance + a few inches
-
-
-  chassis.set_drive_pid(24, DRIVE_SPEED, true);
-  chassis.wait_drive();
-
-  chassis.set_drive_pid(-12, DRIVE_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_drive_pid(-12, DRIVE_SPEED);
-  chassis.wait_drive();
-}
-
-
-
-///
-// Turn Example
-///
-void turn_example() {
-  // The first parameter is target degrees
-  // The second parameter is max speed the robot will drive at
-
-
-  chassis.set_turn_pid(90, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(45, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(0, TURN_SPEED);
-  chassis.wait_drive();
-}
-
-
-
-///
-// Combining Turn + Drive
-///
-void drive_and_turn() {
-  chassis.set_drive_pid(24, DRIVE_SPEED, true);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(45, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(-45, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(0, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_drive_pid(-24, DRIVE_SPEED, true);
-  chassis.wait_drive();
-}
-
-
-
-///
-// Wait Until and Changing Max Speed
-///
-void wait_until_change_speed() {
-  // wait_until will wait until the robot gets to a desired position
-
-
-  // When the robot gets to 6 inches, the robot will travel the remaining distance at a max speed of 40
-  chassis.set_drive_pid(24, DRIVE_SPEED, true);
-  chassis.wait_until(6);
-  chassis.set_max_speed(40); // After driving 6 inches at DRIVE_SPEED, the robot will go the remaining distance at 40 speed
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(45, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(-45, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(0, TURN_SPEED);
-  chassis.wait_drive();
-
-  // When the robot gets to -6 inches, the robot will travel the remaining distance at a max speed of 40
-  chassis.set_drive_pid(-24, DRIVE_SPEED, true);
-  chassis.wait_until(-6);
-  chassis.set_max_speed(40); // After driving 6 inches at DRIVE_SPEED, the robot will go the remaining distance at 40 speed
-  chassis.wait_drive();
-}
-
-
-
-///
-// Swing Example
-///
-void swing_example() {
-  // The first parameter is ez::LEFT_SWING or ez::RIGHT_SWING
-  // The second parameter is target degrees
-  // The third parameter is speed of the moving side of the drive
-
-
-  chassis.set_swing_pid(ez::LEFT_SWING, 45, SWING_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_drive_pid(24, DRIVE_SPEED, true);
-  chassis.wait_until(12);
-
-  chassis.set_swing_pid(ez::RIGHT_SWING, 0, SWING_SPEED);
-  chassis.wait_drive();
-}
-
-
-
-///
-// Auto that tests everything
-///
-void combining_movements() {
-  chassis.set_drive_pid(24, DRIVE_SPEED, true);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(45, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_swing_pid(ez::RIGHT_SWING, -45, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_turn_pid(0, TURN_SPEED);
-  chassis.wait_drive();
-
-  chassis.set_drive_pid(-24, DRIVE_SPEED, true);
-  chassis.wait_drive();
-}
-
-
-
-///
-// Interference example
-///
-void tug (int attempts) {
-  for (int i=0; i<attempts-1; i++) {
-    // Attempt to drive backwards
-    printf("i - %i", i);
-    chassis.set_drive_pid(-12, 127);
-    chassis.wait_drive();
-
-    // If failsafed...
-    if (chassis.interfered) {
-      chassis.reset_drive_sensor();
-      chassis.set_drive_pid(-2, 20);
-      pros::delay(1000);
-    }
-    // If robot successfully drove back, return
-    else {
-      return;
-    }
-  }
-}
-
-// If there is no interference, robot will drive forward and turn 90 degrees. 
-// If interfered, robot will drive forward and then attempt to drive backwards. 
-void interfered_example() {
- chassis.set_drive_pid(24, DRIVE_SPEED, true);
- chassis.wait_drive();
-
- if (chassis.interfered) {
-   tug(3);
-   return;
- }
-
- chassis.set_turn_pid(90, TURN_SPEED);
- chassis.wait_drive();
-}
-
-
-
 // . . .
 // Make your own autonomous functions here!
 // . . .
+//Help Functions and Variables
+pros::Motor intakeAuton(21,pros::E_MOTOR_GEARSET_06);
+pros::Motor cataAuton(18,pros::E_MOTOR_GEARSET_36);
+pros::ADIDigitalIn cataSwitch ('H');
+bool L1pushed = false;
+int loopAttempts = 0;
+int cataSpeed = 0;
 
 void rollSpiner() {
-  chassis.set_drive_pid(24, DRIVE_SPEED, true);
+  chassis.set_drive_pid(14, DRIVE_SPEED, true);
   chassis.wait_drive();
-  intake = 110;
+  ///intakeAuton = -110;
+  pros::delay(150);
+  //intakeAuton = 0;
+  chassis.set_drive_pid( -14, DRIVE_SPEED, true);
+  chassis.wait_drive();
+}
+void rollSpinerMove() {
+  chassis.set_drive_pid(30, DRIVE_SPEED, true);
+  chassis.wait_drive();
+  chassis.set_turn_pid(180, TURN_SPEED);
+  chassis.wait_drive();
+  chassis.reset_gyro(0);
+}
+void nothing() {
+  chassis.set_drive_pid(8, DRIVE_SPEED, true);
+}
+void skills() {
+  pros::c::adi_pin_mode('G', OUTPUT);
+  chassis.set_drive_pid(10, DRIVE_SPEED, true);
+  chassis.wait_drive();
+  intakeAuton = -110;
+  pros::delay(250);
+  intakeAuton = 0;
+  chassis.set_drive_pid( -10, DRIVE_SPEED, true);
+  chassis.wait_drive();
+  chassis.set_turn_pid(145, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  intakeAuton = 105;
+  chassis.set_drive_pid(52, DRIVE_SPEED);
+  chassis.wait_drive();
   pros::delay(500);
-  intake = 0;
+  intakeAuton = 0;
+  chassis.set_drive_pid(20, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(-60, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  chassis.set_drive_pid(25, DRIVE_SPEED);
+  chassis.wait_drive();
+  intakeAuton = -110;
+  pros::delay(250);
+  intakeAuton = 0;
+  chassis.set_drive_pid(-25, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(-90, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  chassis.set_drive_pid(-160, DRIVE_SPEED);
+  chassis.wait_drive();
+   chassis.set_turn_pid(8, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  cataAuton = 127;
+  pros::delay(500);
+  cataAuton = 0;
+  while (!cataSwitch.get_value()) {
+      // move cata motor until switch is pressed
+     cataAuton = 127;
+  }
+  cataAuton = 0;
+  pros::delay(1000);
+  chassis.set_turn_pid(-8, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  chassis.set_drive_pid(115, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(235, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  chassis.set_drive_pid(180, 70);
+  intakeAuton = -110;
+  pros::delay(2000);
+  intakeAuton = 0;
+  chassis.set_turn_pid(-85, TURN_SPEED);
+  chassis.wait_drive();
+  chassis.reset_gyro(0);
+  chassis.set_drive_pid(140, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(270, TURN_SPEED);
+  chassis.wait_drive();
+  chassis.reset_gyro(0);
+  chassis.set_drive_pid(20, DRIVE_SPEED);
+  chassis.wait_drive();
+  while (!cataSwitch.get_value()) {
+      // move cata motor until switch is pressed
+     cataAuton = 127;
+  }
+  cataAuton = 0;
+  pros::delay(1000);
+  chassis.set_drive_pid(-160, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(90, TURN_SPEED);
+  chassis.wait_drive();
+  chassis.reset_gyro(0);
+  // chassis.set_drive_pid(10, DRIVE_SPEED);
+  // chassis.wait_drive();
+  // intakeAuton = 127;
+  // pros::delay(150);
+  // intakeAuton = 0;
+  // chassis.set_drive_pid( -10, DRIVE_SPEED, true);
+  // chassis.wait_drive();
+  // chassis.set_turn_pid(145, TURN_SPEED);
+  // chassis.reset_gyro(0);
+  // chassis.wait_drive();
+  // intakeAuton = 105;
+  // chassis.set_drive_pid(52, DRIVE_SPEED);
+  // chassis.wait_drive();
+  // pros::delay(500);
+  // intakeAuton = 0;
+  // chassis.set_drive_pid(20, DRIVE_SPEED);
+  // chassis.wait_drive();
+  // chassis.set_turn_pid(-60, TURN_SPEED);
+  // chassis.reset_gyro(0);
+  // chassis.wait_drive();
+  // chassis.set_drive_pid(25, DRIVE_SPEED);
+  // chassis.wait_drive();
+  // intakeAuton = -110;
+  // pros::delay(200);
+  // intakeAuton = 0;
+  // chassis.set_drive_pid(65, DRIVE_SPEED, true);
+  // chassis.wait_drive();
+  // chassis.set_turn_pid(45, TURN_SPEED);
+  // chassis.wait_drive();
+  // chassis.reset_gyro(0);
+  //expand
+  //pros::c::adi_digital_write('G', HIGH);
 }

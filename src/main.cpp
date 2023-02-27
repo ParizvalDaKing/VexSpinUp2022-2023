@@ -1,13 +1,5 @@
 #include "main.h"
-#include "EZ-Template/auton.hpp"
-#include "iostream"
-#include "EZ-Template/util.hpp"
-#include "pros/adi.h"
-#include "pros/adi.hpp"
-#include "pros/ext_adi.h"
-#include "pros/misc.h"
-#include "pros/motors.h"
-#include "pros/motors.hpp"
+
 
 
 /////
@@ -20,14 +12,14 @@
 Drive chassis (
   // Left Chassis Ports (negative port will reverse it!)
   //   the first port is the sensored port (when trackers are not used!)
-  {-2, -3,4}
+  {-11, -12,13}
 
   // Right Chassis Ports (negative port will reverse it!)
   //   the first port is the sensored port (when trackers are not used!)
-  ,{5, 6,-7}
+  ,{14, 15,-16}
 
   // IMU Port
-  ,10
+  ,19
 
   // Wheel Diameter (Remember, 4" wheels are actually 4.125!)
   //    (or tracking wheel diameter)
@@ -86,14 +78,10 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.add_autons({
-    Auton("Example Drive\n\nDrive forward and come back.", drive_example),
-    Auton("Example Turn\n\nTurn 3 times.", turn_example),
-    Auton("Drive and Turn\n\nDrive forward, turn, come back. ", drive_and_turn),
-    Auton("Drive and Turn\n\nSlow down during drive.", wait_until_change_speed),
-    Auton("Swing Example\n\nSwing, drive, swing.", swing_example),
-    Auton("Combine all 3 movements", combining_movements),
-    Auton("Interference\n\nAfter driving forward, robot performs differently if interfered or not.", interfered_example),
-    Auton("Auton", rollSpiner),
+    Auton("Auton move", rollSpinerMove),
+    Auton("Skills Auton",skills),
+    Auton("Beginning of the game Auton", rollSpiner),
+    Auton("Auton that does nothing", nothing), 
   });
 
   // Initialize chassis and auton selector
@@ -164,23 +152,16 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {
+ void cataFun() {
+    pros::Motor cata(18,pros::E_MOTOR_GEARSET_36);
+    cata.set_brake_mode(MOTOR_BRAKE_HOLD);
+    pros::ADIDigitalIn cataSwitch ('H');
+    bool L1pushed = false;
+    int loopAttempts = 0;
+    int cataSpeed = 0;
 
-  chassis.set_drive_brake(MOTOR_BRAKE_HOLD);
-  pros::Motor cata(9,pros::E_MOTOR_GEARSET_36);
-  pros::Motor intake(8,pros::E_MOTOR_GEARSET_06);
-  pros::ADIDigitalIn cataSwitch ('H');
-  pros::c::adi_pin_mode('G', OUTPUT);
-  bool L1pushed = false;
-  int loopAttempts = 0;
-  int cataSpeed = 0;
+  while(true) {
 
-  intake.set_brake_mode(MOTOR_BRAKE_COAST);
-  cata.set_brake_mode(MOTOR_BRAKE_HOLD);
-
-  while (true) {  
-    chassis.arcade_standard(ez::SINGLE);
-    
     if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
         loopAttempts = 0;
         while (!cataSwitch.get_value()) {
@@ -191,7 +172,7 @@ void opcontrol() {
           cata = cataSpeed * -1;
           if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
             break;
-          }
+          } 
           loopAttempts = loopAttempts+1;
         }
       cata = 0;
@@ -203,28 +184,28 @@ void opcontrol() {
     else {
       cata = 0;
     }
-    // if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-    //   while(!cataSwitch.get_value()) {
-    //     cata = 127;
-        
-    //   }
-    // }
-    // if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
-    //   while(cataSwitch.get_value()) {
-    //     cata = 127;
-    //     if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-    //         break;
-    //     }
-    //   }
-    //   cata = 0;
-    //   //pros::delay(500);
-    // }
+  }
+ }
+void opcontrol() { 
+  chassis.set_drive_brake(MOTOR_BRAKE_HOLD);
+  pros::Motor intake(21,pros::E_MOTOR_GEARSET_06);
+  pros::c::adi_pin_mode('G', OUTPUT);
 
+  
+  intake.set_brake_mode(MOTOR_BRAKE_COAST);
+
+  pros::Task my_cataFun(cataFun);
+
+  while (true) {  
+    //chassis.arcade_standard(ez::SINGLE);
+    chassis.arcade_standard(ez::SPLIT);
+
+    
       if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-      intake = -100;
+      intake = -105;
       }
       else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-        intake = 100;
+        intake = 105;
       }
       else {
         intake = 0;
@@ -239,11 +220,4 @@ void opcontrol() {
       pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIMEoi
     }
   }
-    
-    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-    //   pros::c::adi_digital_write('G', HIGH);
-    // }
-    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-    //   pros::c::adi_digital_write('G', LOW);
-    // }
     
