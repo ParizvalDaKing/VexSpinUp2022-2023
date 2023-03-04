@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "EZ-CATA",
+    "project_name": "Skills Auton",
     "target": "v5",
     "templates": {
       "EZ-Template": {
@@ -189,7 +189,8 @@
     },
     "upload_options": {
       "icon": "ufo",
-      "slot": 4
+      "slot": 4,
+      "description": "Skills Auton"
     }
   }
 }

@@ -78,9 +78,9 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.add_autons({
-    Auton("Auton move", rollSpinerMove),
-    Auton("Skills Auton",skills),
     Auton("Beginning of the game Auton", rollSpiner),
+    Auton("Skills Auton",skills),
+    Auton("Auton move", rollSpinerMove),
     Auton("Auton that does nothing", nothing), 
   });
 
@@ -116,7 +116,40 @@ void competition_initialize() {
 }
 
 
+pros::ADIDigitalIn cataSwitch ('H');
+ void cataFun() {
+    pros::Motor cata(18,pros::E_MOTOR_GEARSET_36);
+    cata.set_brake_mode(MOTOR_BRAKE_HOLD);
+    bool L1pushed = false;
+    int loopAttempts = 0;
+    int cataSpeed = 0;
 
+  while(true) {
+
+    if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
+        loopAttempts = 0;
+        while (!cataSwitch.get_value()) {
+          // move cata motor until switch is pressed
+          if(loopAttempts > 100) {
+            cataSpeed = cataSpeed-1;
+          }
+          cata = cataSpeed * -1;
+          if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
+            break;
+          } 
+          loopAttempts = loopAttempts+1;
+        }
+      cata = 0;
+      L1pushed = true;
+    }
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+      cata = 127;
+    }
+    else {
+      cata = 0;
+    }
+  }
+ }
 /**
  * Runs the user autonomous code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -152,40 +185,7 @@ void autonomous() {
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
- void cataFun() {
-    pros::Motor cata(18,pros::E_MOTOR_GEARSET_36);
-    cata.set_brake_mode(MOTOR_BRAKE_HOLD);
-    pros::ADIDigitalIn cataSwitch ('H');
-    bool L1pushed = false;
-    int loopAttempts = 0;
-    int cataSpeed = 0;
 
-  while(true) {
-
-    if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-        loopAttempts = 0;
-        while (!cataSwitch.get_value()) {
-          // move cata motor until switch is pressed
-          if(loopAttempts > 100) {
-            cataSpeed = cataSpeed-1;
-          }
-          cata = cataSpeed * -1;
-          if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-            break;
-          } 
-          loopAttempts = loopAttempts+1;
-        }
-      cata = 0;
-      L1pushed = true;
-    }
-    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-      cata = 127;
-    }
-    else {
-      cata = 0;
-    }
-  }
- }
 void opcontrol() { 
   chassis.set_drive_brake(MOTOR_BRAKE_HOLD);
   pros::Motor intake(21,pros::E_MOTOR_GEARSET_06);
@@ -201,20 +201,17 @@ void opcontrol() {
     chassis.arcade_standard(ez::SPLIT);
 
     
-      if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+      if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2) && cataSwitch.get_value()) {
       intake = -105;
       }
-      else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+      else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) && cataSwitch.get_value()) {
         intake = 105;
       }
       else {
         intake = 0;
       }
-      if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+      if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
         pros::c::adi_digital_write('G', HIGH);
-      }
-      else if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
-        pros::c::adi_digital_write('G', LOW);
       }
     
       pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIMEoi

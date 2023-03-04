@@ -1,3 +1,4 @@
+#include "autons.hpp"
 #include "main.h"
 
 
@@ -74,7 +75,7 @@ void modified_exit_condition() {
 //Help Functions and Variables
 pros::Motor intakeAuton(21,pros::E_MOTOR_GEARSET_06);
 pros::Motor cataAuton(18,pros::E_MOTOR_GEARSET_36);
-pros::ADIDigitalIn cataSwitch ('H');
+pros::ADIDigitalIn cataSwitchAuton ('H');
 bool L1pushed = false;
 int loopAttempts = 0;
 int cataSpeed = 0;
@@ -102,8 +103,8 @@ void skills() {
   pros::c::adi_pin_mode('G', OUTPUT);
   chassis.set_drive_pid(10, DRIVE_SPEED, true);
   chassis.wait_drive();
-  intakeAuton = -110;
-  pros::delay(250);
+  intakeAuton = -100;
+  pros::delay(200);
   intakeAuton = 0;
   chassis.set_drive_pid( -10, DRIVE_SPEED, true);
   chassis.wait_drive();
@@ -120,93 +121,78 @@ void skills() {
   chassis.set_turn_pid(-60, TURN_SPEED);
   chassis.reset_gyro(0);
   chassis.wait_drive();
-  chassis.set_drive_pid(25, DRIVE_SPEED);
+  chassis.set_drive_pid(22, DRIVE_SPEED);
   chassis.wait_drive();
-  intakeAuton = -110;
-  pros::delay(250);
+  intakeAuton = -100;
+  pros::delay(200);
   intakeAuton = 0;
-  chassis.set_drive_pid(-25, DRIVE_SPEED);
+  chassis.set_drive_pid(-22, DRIVE_SPEED);
   chassis.wait_drive();
   chassis.set_turn_pid(-90, TURN_SPEED);
   chassis.reset_gyro(0);
   chassis.wait_drive();
-  chassis.set_drive_pid(-160, DRIVE_SPEED);
+  chassis.set_drive_pid(-170, DRIVE_SPEED);
   chassis.wait_drive();
-   chassis.set_turn_pid(8, TURN_SPEED);
+   chassis.set_turn_pid(20, TURN_SPEED);
   chassis.reset_gyro(0);
   chassis.wait_drive();
   cataAuton = 127;
-  pros::delay(500);
+  pros::delay(700);
   cataAuton = 0;
-  while (!cataSwitch.get_value()) {
+  while (!cataSwitchAuton.get_value()) {
       // move cata motor until switch is pressed
      cataAuton = 127;
   }
   cataAuton = 0;
   pros::delay(1000);
-  chassis.set_turn_pid(-8, TURN_SPEED);
-  chassis.reset_gyro(0);
+  chassis.set_turn_pid(-12, TURN_SPEED);
+  chassis.reset_gyro();
   chassis.wait_drive();
-  chassis.set_drive_pid(115, DRIVE_SPEED);
-  chassis.wait_drive();
-  chassis.set_turn_pid(235, TURN_SPEED);
-  chassis.reset_gyro(0);
-  chassis.wait_drive();
-  chassis.set_drive_pid(180, 70);
-  intakeAuton = -110;
-  pros::delay(2000);
-  intakeAuton = 0;
-  chassis.set_turn_pid(-85, TURN_SPEED);
-  chassis.wait_drive();
-  chassis.reset_gyro(0);
-  chassis.set_drive_pid(140, DRIVE_SPEED);
-  chassis.wait_drive();
-  chassis.set_turn_pid(270, TURN_SPEED);
-  chassis.wait_drive();
-  chassis.reset_gyro(0);
-  chassis.set_drive_pid(20, DRIVE_SPEED);
-  chassis.wait_drive();
-  while (!cataSwitch.get_value()) {
-      // move cata motor until switch is pressed
-     cataAuton = 127;
-  }
-  cataAuton = 0;
-  pros::delay(1000);
-  chassis.set_drive_pid(-160, DRIVE_SPEED);
+  chassis.set_drive_pid(-111, DRIVE_SPEED);
   chassis.wait_drive();
   chassis.set_turn_pid(90, TURN_SPEED);
-  chassis.wait_drive();
   chassis.reset_gyro(0);
-  // chassis.set_drive_pid(10, DRIVE_SPEED);
-  // chassis.wait_drive();
-  // intakeAuton = 127;
-  // pros::delay(150);
-  // intakeAuton = 0;
-  // chassis.set_drive_pid( -10, DRIVE_SPEED, true);
-  // chassis.wait_drive();
-  // chassis.set_turn_pid(145, TURN_SPEED);
-  // chassis.reset_gyro(0);
-  // chassis.wait_drive();
-  // intakeAuton = 105;
-  // chassis.set_drive_pid(52, DRIVE_SPEED);
-  // chassis.wait_drive();
-  // pros::delay(500);
-  // intakeAuton = 0;
-  // chassis.set_drive_pid(20, DRIVE_SPEED);
-  // chassis.wait_drive();
-  // chassis.set_turn_pid(-60, TURN_SPEED);
-  // chassis.reset_gyro(0);
-  // chassis.wait_drive();
-  // chassis.set_drive_pid(25, DRIVE_SPEED);
-  // chassis.wait_drive();
-  // intakeAuton = -110;
-  // pros::delay(200);
-  // intakeAuton = 0;
-  // chassis.set_drive_pid(65, DRIVE_SPEED, true);
-  // chassis.wait_drive();
-  // chassis.set_turn_pid(45, TURN_SPEED);
-  // chassis.wait_drive();
-  // chassis.reset_gyro(0);
-  //expand
-  //pros::c::adi_digital_write('G', HIGH);
+  chassis.wait_drive();
+  chassis.set_drive_pid(-280, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(90, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  chassis.set_drive_pid(17, DRIVE_SPEED);
+  chassis.wait_drive();
+  intakeAuton = -100;
+  pros::delay(200);
+  intakeAuton = 0;
+  chassis.set_drive_pid( -20, DRIVE_SPEED, true);
+  chassis.wait_drive();
+  chassis.set_turn_pid(145, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  intakeAuton = 105;
+  chassis.set_drive_pid(42, DRIVE_SPEED);
+  chassis.wait_drive();
+  pros::delay(500);
+  intakeAuton = 0;
+  chassis.set_drive_pid(10, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(-60, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  chassis.set_drive_pid(35, DRIVE_SPEED);
+  chassis.wait_drive();
+  intakeAuton = -100;
+  pros::delay(200);
+  intakeAuton = 0;
+  chassis.set_drive_pid(-35, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(-135, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  chassis.set_drive_pid(10, DRIVE_SPEED);
+  chassis.wait_drive();
+  chassis.set_turn_pid(90, TURN_SPEED);
+  chassis.reset_gyro(0);
+  chassis.wait_drive();
+  // //expand
+  // //pros::c::adi_digital_write('G', HIGH);
 }
