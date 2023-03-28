@@ -78,8 +78,8 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.add_autons({
-    Auton("Beginning of the game Auton", rollSpiner),
     Auton("Skills Auton",skills),
+    Auton("Beginning of the game Auton", rollSpiner),
     Auton("Auton move", rollSpinerMove),
     Auton("Auton that does nothing", nothing), 
   });

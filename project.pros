@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Skills Auton",
+    "project_name": "Skills Auton 3 step",
     "target": "v5",
     "templates": {
       "EZ-Template": {
@@ -189,8 +189,8 @@
     },
     "upload_options": {
       "icon": "ufo",
-      "slot": 4,
-      "description": "Skills Auton"
+      "slot": 2,
+      "description": "Skills Programming 3 step"
     }
   }
 }
